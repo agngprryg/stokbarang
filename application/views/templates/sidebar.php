@@ -50,6 +50,13 @@
            <!-- divider -->
            <hr class = "border border-light m-0">
 
+           <li class="nav-item">
+                <a class="nav-link" href="<?= base_url('laporan') ?>">
+                    <i class="fas fa-book"></i>
+                    <span>Laporan</span></a>
+            </li>
+
+
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center mt-5">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>

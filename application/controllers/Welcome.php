@@ -16,9 +16,16 @@ class Welcome extends CI_Controller
 	{
 		$t['title'] = "Home Page";
 		$this->load->view('templates/header', $t);
+		$this->load->view('auth/login');
+		$this->load->view('templates/footer');
+	}
+	public function satu()
+	{
+		$t['title'] = "Home Page";
+		$this->load->view('templates/header', $t);
 		$this->load->view('templates/sidebar');
 		$this->load->view('templates/topbar');
-		$this->load->view('index');
+		$this->load->view('homepage');
 		$this->load->view('templates/footer');
 	}
 
@@ -51,7 +58,9 @@ class Welcome extends CI_Controller
 		$t['title'] = "Transaksi page";
 		$array =[
 			'tot' => $this->proses->totale(),
-			'data' => $this->proses->data_transaksi()
+			'data' => $this->proses->data_transaksi(),
+			'nota' => $this->proses->data_not(),
+			'det_nota' => $this->proses->data_detail_not()
 		] ;
 		$this->load->view('templates/header', $t);
 		$this->load->view('templates/sidebar');
@@ -61,12 +70,13 @@ class Welcome extends CI_Controller
 	}
 	public function lima()
 	{
-		$t['title'] = "Detail Transaksi";
-		$d['data'] = $this->proses->data_transaksi();
+		$cari = $this->input->post('cari_tgl');
+		$t['title'] = "Laporan Pembelian";
+		$d['fil'] = $this->proses->cari_tanggal($cari); 
 		$this->load->view('templates/header', $t);
 		$this->load->view('templates/sidebar');
 		$this->load->view('templates/topbar');
-		$this->load->view('detail_trans',$d);
+		$this->load->view('laporan', $d);
 		$this->load->view('templates/footer');
 	}
 }

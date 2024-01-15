@@ -60,8 +60,8 @@ class Editor extends CI_Controller
         $this->proses->delete_trans($del);
         redirect(base_url('transaksi'));
     }
-    public function pembayaran(){
-        $this->proses->Bayar();
+    public function detail_tr(){
+        $this->proses->detail_tr();
         redirect(base_url('transaksi'));
     }    
 }

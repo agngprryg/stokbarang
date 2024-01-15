@@ -32,6 +32,11 @@ class Simpan extends CI_Controller
         redirect(base_url('transaksi'));
     }
 
-   
+    public function tanggal()
+    {
+        $d=$this->input->post('cari_tgl');
+        $this->Proses->cari_tanggal();
+        redirect(base_url('laporan'));
+    }
 
 }

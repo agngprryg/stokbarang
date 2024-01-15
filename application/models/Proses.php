@@ -198,79 +198,148 @@ class Proses extends CI_Model
         $jumlah=$this->input->post('jml');
         $jual=$this->input->post('harga');
         $totharga=$jumlah*$jual;
-        $agung=array('jml_brg_trans'=>$jumlah,'total_hrg'=>$totharga);
-        $this->db->where('kode_brg=', $kode_brg);
-        $this->db->update('tb_transaksi',$agung);
+
+        // mengecek jumlah stok di data barang
+        $this->db->select('*');
+        $this->db->from('tb_data_barang');
+        $this->db->where('kode_brg', $kode);
+        $cekstok = $this->db->get()->result();
+        
+        foreach($cekstok as $cek);
+        $jmlstok = $cek->jml_brg;
+        if ($jumlah < $jmlstok) {
+            ?> <script type="text/javascript">
+                    alert('stok nya kurang nih');
+                    window.location = '../stok_barang/transaksi';
+                </script>
+            <?php
+        }else{
+            $agung = array(
+                'jml_brg_trans'=>$jumlah,
+                'total_hrg'=>$totharga
+            );
+    
+            $this->db->where('kode_brg=', $kode_brg);
+            $this->db->update('tb_transaksi',$agung);
+        }
+
     }
 
     public function cari_brg()
     {
+        //qbarang
         $kodedt = $this->input->post('kode_brg');
         $this->db->select('*');
         $this->db->from('tb_data_barang');
-        $this->db->join('tb_jenis_barang',
-        'tb_data_barang.kode_jenis=tb_jenis_barang.kode_jenis');
-        $this->db->where('tb_data_barang.kode_brg=',$kodedt);
-        $query1 = $this->db->get()->result();
-        foreach($query1 as $tupais);
-        $kodebarang=@$tupais->kode_brg;
-        if (!$kodebarang) {
-            ?> <script type="text/javascript">
-                    alert('gada bang');
-                    window.location = '../transaksi';
-                </script>
-            <?php
-            }
-        else{
-        foreach ($query1 as $data);
-        $kodedt = $data->kode_brg;
+        $this->db->where('kode_brg',$kodedt);
+        $qbarang = $this->db->get()->result();
+        // nota
+        $nota = $this->input->post('nota');
+        $this->db->from('tb_detail_trans');
+        $nota_get = $this->db->get()->result();
+        //
+        foreach ($qbarang as $data);
+        $kode = $data->kode_brg;
         $nm_brg=$data->nama_brg;
         $harga=$data->hrg_jual;
         $jnsbrg=$data->kode_jenis;
+        $jbrg=$data->jml_brg;
         $tgl=Date('Y-m-d');
-        $kodetr=Date('Ymds');
-        $save = $this->db->query("INSERT INTO tb_transaksi(`tgl_transaksi`, `kode_transaksi`, `kode_brg`, `jenis_barang`, `jml_brg_trans`, 
-        `hrg_brg`, `total_hrg`) 
-        values('$tgl', '$kodetr','$kodedt', '$jnsbrg', '1', '$harga', '$harga')");
-         
-        if ($save) {
-            ?> <script type="text/javascript">
+        $kodetr=Date('Ymd');
+        //
+        foreach($nota_get as $datanota);
+        $nomornota=@$datanota->nota;
+        $not = $nomornota + 1;
+        //barang
+        $this->db->select('*');
+        $this->db->from('tb_transaksi');
+        $this->db->where('kode_brg=',$kodedt);
+        $barang = $this->db->get()->result();
+        foreach ($barang as $tbrg);
+        $hit=@$tbrg->jml_brg_trans;
+        $kod=@$tbrg->kode_brg;
+    switch($kode){
+        case $kod :
+            if($hit>=$jbrg){
+                ?> <script type="text/javascript">
+                    alert('stok belum ada nih');
                     window.location = '../transaksi';
                 </script>
             <?php
-            } else {
-            ?> <script type="text/javascript">
-                    window.location = '../transaksi';
-                </script>
-            <?php
+            }else{
+                $tung=$hit+1;
+                $_array = array('jml_brg_trans'=>$tung);
+                $this->db->where('kode_brg',$kodedt);
+                $updatenya=$this->db->update('tb_transaksi', $_array);
+                ?> <script type="text/javascript">
+                       // alert('stok belum ada nih');
+                        window.location = '../transaksi';
+                    </script>
+                <?php
             }
+            break;
+        case $kode :
+            $save = $this->db->query("INSERT INTO tb_transaksi(`tgl_transaksi`, `kode_transaksi`, `kode_brg`, `jenis_barang`, `jml_brg_trans`, 
+            `hrg_brg`, `total_hrg`) 
+            values('$tgl', '$kodetr','$kodedt', '$jnsbrg', '1', '$harga', '$harga')");
+             
+            if ($save) {
+                ?> <script type="text/javascript">
+                        window.location = '../transaksi';
+                    </script>
+                <?php
+                }
+            break;
+    }
+    }
+
+    public function detail_tr(){
+        $this->db->select('*');
+        $this->db->from('tb_transaksi');
+        $trans = $this->db->get()->result();
+        foreach($trans as $det){
+            echo $det->kode_brg;
+            $save = $this->db->query("INSERT INTO 
+            tb_detail_trans(`tgl_transaksi`, `nota`, `kode_transaksi`, `kode_brg`, 
+            `jenis_barang`, `jmlbrg`, `harga_brg`, `total_hrg`)
+            values(
+                '$det->tgl_transaksi',
+                '$det->kode_transaksi',
+                '$det->kode_transaksi',
+                '$det->kode_brg',
+                '$det->jenis_barang',
+                '$det->jml_brg_trans',
+                '$det->hrg_brg',
+                '$det->total_hrg'
+                )");
+            $this->db->select('*');
+            $this->db->from('tb_detail_trans');
+            $this->db->where('kode_brg', $det->kode_brg);
+            $det_trans = $this->db->get()->result();
+            //
+            foreach($det_trans as $jml );
+            $this->db->select('*');
+            $this->db->from('tb_data_barang');
+            $this->db->where('kode_brg', $det->kode_brg);
+            $dbrg = $this->db->get()->result();
+            //
+            foreach($dbrg as $jmlkurang );
+            $hitung=($jmlkurang->jml_brg) - ($trans->jml_brg_trans);
+            echo($hitung);
+            $_array =array('jml_brg' => $hitung);
+            $this->db->where('kode_brg', $det->kode_brg);
+            $updatenya=$this->db->update('tb_data_barang',$_array);
+            if($save){
+                $this->db->truncate('tb_transaksi');
+                ?> <script type="text/javascript">
+                        window.location = '../transaksi';
+                    </script>
+                <?php
+            }
+            
         }
     }
-    public function update_trans(){
-        $kode = $this->input->post('kode');
-        $jml = $this->input->post('jml');
-        $jual = $this->input->post('hrg');
-        $totharga = $jml * $jual;
-        $_array = array(
-            'jml_brg' =>$jml,
-            'total_hrg' =>$totharga
-        );
-        $this->db->where('kode_brg', $kode);
-        $updatenya = $this->db->update('tb_transaksi', $_array);
-        
-        if ($updatenya) {
-            ?> <script type="text/javascript">
-                    window.location = '../stok_barang/transaksi';
-                </script>
-            <?php
-            } else {
-            ?> <script type="text/javascript">
-                    window.location = '../stok_barang/transaksi';
-                </script>
-            <?php
-            }
-    
-    }
+
 
     public function chekout()
     {
@@ -286,6 +355,28 @@ class Proses extends CI_Model
         $this->db->query('delete from tb_transaksi where tb_transaksi.kode_transaksi');
     }
     
-
+    public function data_not(){
+        $this->db->select('*');
+        $this->db->from('tb_transaksi');
+        $query = $this->db->get()->result();
+        return $query;
+    }
+    public function data_detail_not(){
+        $this->db->select('*');
+        $this->db->from('tb_detail_trans');
+        $query = $this->db->get()->result();
+        return $query;
+    }
+    public function cari_tanggal(){
+        $d = $this->input->post('cari_tgl');
+        $this->db->select('*');
+        $this->db->from('tb_detail_trans');
+        $this->db->join('tb_jenis_barang',
+        'tb_detail_trans.jenis_barang=tb_jenis_barang.kode_jenis');
+        $this->db->join('tb_data_barang',
+        'tb_detail_trans.kode_brg=tb_data_barang.kode_brg');
+        $query = $this->db->get()->result();
+        return $query;
+    }
 
 }

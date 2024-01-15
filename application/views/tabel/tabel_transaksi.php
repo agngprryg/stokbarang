@@ -1,7 +1,24 @@
 <div class = "mt-4" >
-    <form class="font-monospace" method="POST" action="<?= base_url('simpan/cari_barang'); ?>">
+    <form class="font-monospace mb-5" method="POST" action="<?= base_url('simpan/cari_barang'); ?>">
+    <?php 
+        foreach($nota as $get_nota);
+        foreach($det_nota as $no_nota);
+        $tgl = date('ymd');
+        $nomor = @$no_nota->nota; 
+        $dtgl = @$no_nota->kode_transaksi;
+    ?>
         <div class="" style="height: 80px;">
-            <p>Nota</p>
+            <p><label for="">Nota : <?php
+                if (($nomor > 0) and ($dtgl == $tgl)){
+                    $hnota = $nomor + 1;
+                    $nota = @$hnota;
+                    echo $tgl.@$hnota;
+                }else{
+                    $hnota = 1;
+                    $nota = @$hnota;
+                    echo $tgl.@$hnota;
+                }
+            ?></label></p>
             <label class="form-label">Kode Barang</label>
             <input class ="w-25" style="height: 50px;" type="text" name="kode_brg" required>
             <button type="submit" name="submit" class="btn btn-primary">Tambah</button>
@@ -75,11 +92,11 @@
                 <?php
                 }
             ?>
-            <tr>  
-                <td colspan="8" align="right">   
-                    <a href=""><button class="btn btn-success"  >selesai</button></a>
-                </td>
-            </tr>
     </form>
+    <tr>  
+        <td colspan="8" align="right">   
+            <a href="<?= base_url('editor/detail_tr/'); ?>"><button class="btn btn-success">selesai</button></a>
+        </td>
+    </tr>
     </thead>
 </table>
